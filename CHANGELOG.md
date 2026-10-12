@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/andersondanilo/notification-forwarder/compare/v0.2.0...v0.2.1) (2026-10-12)
+
+
+### Documentation
+
+* explain why the project exists ([cb865d9](https://github.com/andersondanilo/notification-forwarder/commit/cb865d903d36bdb492c59c58da3f25372682a8b8))
+
 ## [0.2.0](https://github.com/andersondanilo/notification-forwarder/compare/v0.1.0...v0.2.0) (2026-10-12)
 
 
