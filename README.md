@@ -7,6 +7,18 @@ Forward desktop notifications from a Linux machine to another machine running **
 
 The connection is TCP with **mutual TLS**: the server only accepts clients that hold a certificate signed by your private CA, and clients only trust a server certified by that same CA. Notifications are sent as BSON documents with the fields `summary`, `body`, `icon` and `appname`.
 
+## Why this project exists
+
+When I work away from home I use a Windows on ARM laptop (a Samsung Galaxy Book Go). It can't run Linux, but its battery life is excellent. It is also very weak, so I use it only as a thin client: I connect to my powerful Linux PC at home through a Cloudflare tunnel and SSH, and I do all my work in the terminal.
+
+I wrote a terminal project, `pomodoro-time-chamber`, that sends desktop notifications. The problem is that those notifications are raised on the Linux machine's desktop, and since I am working through an SSH session I never see them on the Windows laptop in front of me.
+
+This project fixes that: `nf-server` listens for the notifications on the Linux PC and `nf-client` shows them as native notifications on the machine I am actually using.
+
+### Ideas for the future
+
+Forwarding my Linux notifications to my smartphone would be a natural next step, since the server already broadcasts every notification to whatever client connects. Something that does this may well exist already (KDE Connect and similar projects come to mind), so I would look at what is out there before building it.
+
 ## Requirements
 
 - **Server:** Linux with a D-Bus **session bus**
