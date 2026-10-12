@@ -45,6 +45,10 @@ Mutual TLS with a private CA. Nothing secret or certificate-related is compiled 
   - Use `!` or a `BREAKING CHANGE:` footer for breaking changes
   - Scopes are typically the crate name (`server`, `client`)
 
+## Releases
+
+Automated with [release-please](https://github.com/googleapis/release-please) (`.github/workflows/release.yml`, `release-please-config.json`, `.release-please-manifest.json`). It derives the next version and `CHANGELOG.md` from the Conventional Commits on `main` (`feat` → minor, `fix`/`perf` → patch, `!`/`BREAKING CHANGE` → minor while < 1.0; `docs`, `refactor`, `build`, `ci`, `revert` appear in the changelog; `chore`, `style`, `test` are hidden), so **commit messages (or squash-merge PR titles) must be valid Conventional Commits or they won't be released correctly**. Merging the release PR tags `vX.Y.Z`, creates the GitHub release and the same workflow builds and attaches the binaries: `nf-server` + `nf-client` for Linux x86_64, `nf-client` only for Windows x86_64/arm64 and macOS arm64/x86_64 (`nf-server` is Linux-only). Both crates share one version: `[workspace.package] version` in the root `Cargo.toml` (crates use `version.workspace = true`), which release-please updates. `Cargo.lock` is not touched by release-please, so it may need a trivial `cargo build` refresh after a release. The repo setting "Allow GitHub Actions to create and approve pull requests" must be enabled.
+
 ## Keeping this file current
 
 Update this file whenever the project changes in a way that affects it (new crates, commands, architecture, conventions).

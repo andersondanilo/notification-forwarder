@@ -16,6 +16,22 @@ The connection is TCP with **mutual TLS**: the server only accepts clients that 
 
 ## Install
 
+### From a release (no Rust needed)
+
+Download the archive for your platform from the [Releases page](https://github.com/andersondanilo/notification-forwarder/releases), verify it against the `.sha256` file next to it, and unpack it:
+
+| Platform              | Archive                                              | Contents                |
+| --------------------- | ---------------------------------------------------- | ----------------------- |
+| Linux x86_64          | `notification-forwarder-vX.Y.Z-x86_64-unknown-linux-gnu.tar.gz` | `nf-server`, `nf-client` |
+| Windows x86_64        | `...-x86_64-pc-windows-msvc.zip`                     | `nf-client.exe`         |
+| Windows on ARM        | `...-aarch64-pc-windows-msvc.zip`                    | `nf-client.exe`         |
+| macOS Apple Silicon   | `...-aarch64-apple-darwin.tar.gz`                    | `nf-client`             |
+| macOS Intel           | `...-x86_64-apple-darwin.tar.gz`                     | `nf-client`             |
+
+The server is Linux-only (it needs D-Bus), so only the Linux archive contains it. The binaries are not code-signed, so macOS Gatekeeper and Windows SmartScreen may warn the first time you run them.
+
+### From source
+
 ```sh
 git clone https://github.com/andersondanilo/notification-forwarder && cd notification-forwarder
 cargo install --path nf-server   # on the (Linux) machine that sends notifications
@@ -302,4 +318,4 @@ cargo build
 cargo test
 ```
 
-Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/). See `CLAUDE.md` for the project layout.
+Commits and PR titles follow [Conventional Commits](https://www.conventionalcommits.org/); releases are generated from them by [release-please](https://github.com/googleapis/release-please): merge the release PR it opens to publish a new version with binaries attached. See `CLAUDE.md` for the project layout.

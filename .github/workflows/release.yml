@@ -1,0 +1,108 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  # Opens/updates a release PR from the Conventional Commits on main. Merging
+  # that PR creates the tag and GitHub release, and release_created turns true.
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  # Builds the binaries for each platform and attaches them to the release.
+  # nf-server needs D-Bus, so it is only built for Linux; nf-client is built everywhere.
+  build:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            packages: -p nf-server -p nf-client
+            bins: nf-server nf-client
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            packages: -p nf-client
+            bins: nf-client.exe
+          - target: aarch64-pc-windows-msvc
+            os: windows-11-arm
+            packages: -p nf-client
+            bins: nf-client.exe
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            packages: -p nf-client
+            bins: nf-client
+          - target: x86_64-apple-darwin
+            os: macos-latest
+            packages: -p nf-client
+            bins: nf-client
+    env:
+      TAG: ${{ needs.release-please.outputs.tag_name }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }} ${{ matrix.packages }}
+
+      - name: Package (Linux/macOS)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          name="notification-forwarder-${TAG}-${{ matrix.target }}"
+          mkdir "$name"
+          for bin in ${{ matrix.bins }}; do
+            cp "target/${{ matrix.target }}/release/$bin" "$name/"
+          done
+          cp README.md "$name/"
+          tar czf "$name.tar.gz" "$name"
+          shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
+          echo "ASSET=$name.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $name = "notification-forwarder-$env:TAG-${{ matrix.target }}"
+          New-Item -ItemType Directory $name | Out-Null
+          foreach ($bin in "${{ matrix.bins }}".Split(" ")) {
+            Copy-Item "target/${{ matrix.target }}/release/$bin" $name
+          }
+          Copy-Item README.md $name
+          Compress-Archive -Path $name -DestinationPath "$name.zip"
+          $hash = (Get-FileHash "$name.zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $name.zip" | Out-File -Encoding ascii "$name.zip.sha256"
+          "ASSET=$name.zip" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+
+      - name: Upload to release
+        shell: bash
+        run: gh release upload "$TAG" "$ASSET" "$ASSET.sha256" --clobber
