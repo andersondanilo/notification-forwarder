@@ -1,4 +1,4 @@
-# notification-forwader
+# notification-forwarder
 
 Rust Cargo workspace with two binaries:
 
