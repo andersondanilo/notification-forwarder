@@ -4,4 +4,4 @@ members = ["nf-server", "nf-client"]
 
 [workspace.package]
 # Single version for both binaries; bumped by release-please.
-version = "0.1.0"
+version = "0.2.0"
