@@ -17,7 +17,7 @@ The connection is TCP with **mutual TLS**: the server only accepts clients that 
 ## Install
 
 ```sh
-git clone <this repo> && cd notification-forwader
+git clone https://github.com/andersondanilo/notification-forwader && cd notification-forwader
 cargo install --path nf-server   # on the (Linux) machine that sends notifications
 cargo install --path nf-client   # on the machine that shows them (Linux, Windows or macOS)
 ```
@@ -163,7 +163,7 @@ This walks through setting up `nf-client` on Windows 10/11 from scratch. It assu
 ### 2. Build and install the client
 
 ```powershell
-git clone <this repo> notification-forwader
+git clone https://github.com/andersondanilo/notification-forwader
 cd notification-forwader
 cargo install --path nf-client
 ```
